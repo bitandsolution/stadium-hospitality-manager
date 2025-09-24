@@ -4,7 +4,7 @@ import { useSupabase } from '../providers'
 import { useEffect, useState } from 'react'
 import { Users, DoorOpen, LogOut } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import GuestList from '@/components/GuestList'
+import { GuestList } from '@/components/GuestList';
 
 interface ProfileData {
   id: string
@@ -38,6 +38,13 @@ export default function DashboardPage() {
     }
   }, [user])
 
+  // ✅ CORRETTO - Redirect dentro useEffect
+  useEffect(() => {
+    if (!loading && !session) {
+      router.push('/login')
+    }
+  }, [loading, session, router])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/login')
@@ -51,9 +58,13 @@ export default function DashboardPage() {
     )
   }
 
+  // ✅ Mostra loading invece di redirect diretto
   if (!session || !profile) {
-    router.push('/login')
-    return null
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Reindirizzamento...</div>
+      </div>
+    )
   }
 
   return (
@@ -89,10 +100,7 @@ export default function DashboardPage() {
           <p className="text-gray-600">Check-in e monitoraggio accessi</p>
         </div>
 
-        <GuestList 
-          userId={profile.id} 
-          userRole={profile.role}
-        />
+        <GuestList/>
       </main>
     </div>
   )
